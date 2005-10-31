@@ -5,26 +5,11 @@
 	<element name="monkeygrease">
 		<complexType>
 			<sequence maxOccurs="unbounded" minOccurs="0">
-			
-						<element name="rule" maxOccurs="unbounded" minOccurs="0">
-							<complexType>
-								<sequence minOccurs="0" maxOccurs="unbounded">
-									<any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"></any>
-								</sequence>
-								<attribute name="url-pattern"
-									type="string">
-								</attribute>
-								<attribute name="name"
-									type="string">
-								</attribute>
-								<attribute name="enabled"
-									type="boolean">
-								</attribute>
-								<attribute name="insert-at"
-									type="string">
-								</attribute>
-							</complexType>
-						</element></sequence>
+
+				<element name="rule" maxOccurs="unbounded" minOccurs="0"
+					type="anyType">
+				</element>
+			</sequence>
 		</complexType>
 	</element>
 

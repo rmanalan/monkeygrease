@@ -1,5 +1,5 @@
 <project name="Build Monkeygrease" default="all" basedir=".">
-	<buildnumber/>
+	<buildnumber />
 	<property file="build.properties" />
 	<tstamp>
 		<format property="now" pattern="MMM dd, yyyy HH:mm z" locale="en" timezone="GMT" />
@@ -11,14 +11,11 @@
 	</path>
 	<target name="init">
 		<tstamp />
-		<mkdir dir="${output.dir}" />
-		<mkdir dir="${output.dir}/classes" />
 		<mkdir dir="${output.dir}/classes/META-INF" />
-		<mkdir dir="${output.dir}/WEB-INF" />
 		<mkdir dir="${output.dir}/WEB-INF/lib" />
 		<mkdir dir="${output.dir}/dist" />
 	</target>
-	<target name="all" description="Build the project" depends="clean,compile,copy" />
+	<target name="all" description="Build the project" depends="clean,compile,copy,javadoc,dist-bin,dist-src,clean-build-dir" />
 	<target name="clean" description="Clean the project">
 		<delete includeemptydirs="true" quiet="true">
 			<fileset dir="${output.dir}" includes="**/*" />
@@ -27,6 +24,11 @@
 	</target>
 	<target name="compile" description="Compile Java source files" depends="init">
 		<replaceregexp match="@version.*" replace="@version ${app.version} Build ${build.number} ${now}">
+			<fileset dir="JavaSource">
+				<include name="**/*.java" />
+			</fileset>
+		</replaceregexp>
+		<replaceregexp match="@author.*" replace="@author ${app.author}">
 			<fileset dir="JavaSource">
 				<include name="**/*.java" />
 			</fileset>
@@ -51,18 +53,70 @@
 	</target>
 	<target name="copy" description="Copy files to output directory" depends="init">
 		<copy file="${output.dir}/WEB-INF/lib/monkeygrease.jar" todir="WebContent/WEB-INF/lib" />
+		<copy todir="${output.dir}/WEB-INF">
+			<fileset dir="${basedir}/WebContent/WEB-INF" />
+		</copy>
 	</target>
 	<target name="javadoc">
-		<javadoc access="public" author="true" classpath="classpath" 
-			destdir="${output.dir}/doc" doctitle="Monkeygrease" 
-			nodeprecated="false" nodeprecatedlist="false" noindex="false" 
-			nonavbar="false" notree="false" packagenames="org.manalang.monkeygrease,org.manalang.monkeygrease.utils" source="1.5" sourcepath="JavaSource" splitindex="true" use="true" version="true" />
+		<javadoc access="public" author="true" classpath="classpath" destdir="${output.dir}/api" doctitle="Monkeygrease" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="org.manalang.monkeygrease,org.manalang.monkeygrease.utils" source="1.5" sourcepath="JavaSource" splitindex="true" use="true" version="true" />
 	</target>
 	<target name="dist-bin">
-
+		<mkdir dir="${output.dir}/dist/bin" />
+		<copy file="${output.dir}/WEB-INF/lib/monkeygrease.jar" todir="${output.dir}/dist/bin" />
+		<copy file="${basedir}/WebContent/WEB-INF/monkeygrease.xsd" todir="${output.dir}/dist/bin" />
+		<copy file="${basedir}/WebContent/WEB-INF/monkeygrease.xml" todir="${output.dir}/dist/bin" />
+		<copy file="${basedir}/LICENSE.txt" todir="${output.dir}/dist/bin" />
+		<zip destfile="${output.dir}/dist/bin/${app.name}-${app.version}.zip">
+			<fileset dir="${output.dir}/dist/bin" excludes="${app.name}-${app.version}.zip" />
+		</zip>
+		<tar basedir="${output.dir}/dist/bin" compression="gzip" destfile="${output.dir}/dist/bin/${app.name}-${app.version}.tar.gz" excludes="${app.name}-${app.version}.zip" />
+		<checksum file="${output.dir}/dist/bin/${app.name}-${app.version}.zip" fileext=".md5.txt" />
+		<checksum file="${output.dir}/dist/bin/${app.name}-${app.version}.tar.gz" fileext=".md5.txt" />
+		<delete>
+			<fileset dir="${output.dir}/dist/bin">
+				<exclude name="**/*.zip" />
+				<exclude name="**/*.tar.gz" />
+				<exclude name="**/*.md5.txt" />
+			</fileset>
+		</delete>
 	</target>
 	<target name="dist-src">
-
+		<copy todir="${output.dir}/dist/src/api">
+			<fileset dir="${output.dir}/api" />
+		</copy>
+		<copy todir="${output.dir}/dist/src/java">
+			<fileset dir="${basedir}/JavaSource" />
+		</copy>
+		<copy todir="${output.dir}/dist/src/WEB-INF">
+			<fileset dir="${output.dir}/WEB-INF" />
+		</copy>
+		<copy todir="${output.dir}/dist/src">
+			<fileset dir="${basedir}">
+				<include name="build.*"/>
+				<include name="LICENSE.txt"/>
+			</fileset>
+		</copy>
+		<zip destfile="${output.dir}/dist/src/${app.name}-${app.version}.src.zip">
+			<fileset dir="${output.dir}/dist/src" excludes="${app.name}-${app.version}.zip" />
+		</zip>
+		<tar basedir="${output.dir}/dist/src" compression="gzip"  destfile="${output.dir}/dist/src/${app.name}-${app.version}.src.tar.gz" excludes="${app.name}-${app.version}.src.zip" />
+		<checksum file="${output.dir}/dist/src/${app.name}-${app.version}.src.zip" fileext=".md5.txt" />
+		<checksum file="${output.dir}/dist/src/${app.name}-${app.version}.src.tar.gz" fileext=".md5.txt" />
+		<delete includeemptydirs="true" dir="${output.dir}/dist/src/api" />
+		<delete includeemptydirs="true" dir="${output.dir}/dist/src/java" />
+		<delete includeemptydirs="true" dir="${output.dir}/dist/src/WEB-INF" />
+		<delete>
+			<fileset dir="${output.dir}/dist/src">
+				<exclude name="**/*.zip" />
+				<exclude name="**/*.tar.gz" />
+				<exclude name="**/*.md5.txt" />
+			</fileset>
+		</delete>
+	</target>
+	<target name="clean-build-dir">
+		<delete includeemptydirs="true" dir="${output.dir}/api" />
+		<delete includeemptydirs="true" dir="${output.dir}/classes" />
+		<delete includeemptydirs="true" dir="${output.dir}/WEB-INF" />
 	</target>
 
 

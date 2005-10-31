@@ -23,6 +23,10 @@ import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+/**
+ * @author Rich Manalang
+ * @version 0.11 Build 233 Oct 28, 2005 00:16 GMT
+ */
 public class LogFormatter extends Formatter {
 	
 	public LogFormatter() {

@@ -18,26 +18,21 @@
  */
 package org.manalang.monkeygrease;
 
-import java.io.StringWriter;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.manalang.monkeygrease.utils.InsertAt;
+import org.w3c.dom.CDATASection;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 /**
- * @author rmanalan
- * @version 0.10 Build 173 Oct 25, 2005 23:45 GMT
+ * @author Rich Manalang
+ * @version 0.11 Build 233 Oct 28, 2005 00:16 GMT
  */
 public class Rule {
 
@@ -53,15 +48,9 @@ public class Rule {
 
 	private String strInsertAt;
 
-	private Transformer outerXmlTransformer;
-
 	public Rule(Node ruleNode) throws TransformerFactoryConfigurationError,
 			TransformerException {
-		
-		// sets up the xml transformer so we can serialize generic elements
-		outerXmlTransformer = TransformerFactory.newInstance().newTransformer();
-		outerXmlTransformer.setOutputProperty("omit-xml-declaration", "yes"); 
-		
+
 		name = getAttrValue(ruleNode, "name");
 		setPattern(getAttrValue(ruleNode, "url-pattern"));
 		enabled = getAttrValue(ruleNode, "enabled").equals("true");
@@ -74,32 +63,12 @@ public class Rule {
 			NodeList items = ruleNode.getChildNodes();
 			for (int i = 0; i < items.getLength(); i++) {
 				Node item = items.item(i);
-				if (item.getNodeName() == "item") {
-					String type = getAttrValue(item, "type");
-					if (type.equals("javascript")) {
-						MonkeygreaseFilter.log.config("Found JavaScript item");
-						Javascript js = new Javascript();
-						js.setSrc(getNodeValue(item));
-						elements += js.toString();
-					} else if (type.equals("css")) {
-						MonkeygreaseFilter.log.config("Found CSS item");
-						CascadingStyleSheet css = new CascadingStyleSheet();
-						css.setHref(getNodeValue(item));
-						String media = getAttrValue(item, "media");
-						if (media != null) {
-							css.setMedia(media);
-						}
-						elements += css.toString();
-					}
-				} else {
-					if (item.getNodeType() == Node.ELEMENT_NODE) {
-						MonkeygreaseFilter.log.config("Found generic element");
-						GenericElement ge = new GenericElement();
-						ge.setElement(getOuterXml(item));
-						elements += ge.toString();
-					}
+				if (item.getNodeType() == Node.CDATA_SECTION_NODE) {
+					CDATASection cdata = (CDATASection) item;
+					elements += cdata.getNodeValue().trim() + "\n";
 				}
 			}
+
 		} else {
 			MonkeygreaseFilter.log.config("Rule disabled... moving on");
 		}
@@ -120,50 +89,12 @@ public class Rule {
 		return val.trim();
 	}
 
-	private static String getNodeValue(Node node) {
-		if (node == null)
-			return null;
-		NodeList nodeList = node.getChildNodes();
-		if (nodeList == null)
-			return null;
-		Node child = nodeList.item(0);
-		if (child == null)
-			return null;
-		if ((child.getNodeType() == Node.TEXT_NODE)) {
-			String value = ((Text) child).getData();
-			return value.trim();
-		}
-		return null;
-	}
-
-	public String getOuterXml(Node node) throws TransformerException {
-		DOMSource nodeSource = new DOMSource(node);
-		StringWriter resultStringWriter = new StringWriter();
-		StreamResult streamResult = new StreamResult(resultStringWriter);
-		outerXmlTransformer.transform(nodeSource, streamResult);
-		return resultStringWriter.toString();
-	}
-
-	public String getInnerXml(Node node) throws TransformerException {
-		StringBuffer innerXml = new StringBuffer();
-		if (node.hasChildNodes()) {
-			NodeList childNodes = node.getChildNodes();
-			int i = childNodes.getLength();
-			for (int c = 0; c < i; c++) {
-				innerXml.append(getOuterXml(childNodes.item(c)));
-			}
-			return innerXml.toString();
-		} else {
-			return "";
-		}
-	}
-
 	public String toString() {
 		String sRule = "";
 		if (MonkeygreaseFilter.COMMENTS_ON) {
 			sRule += "<!-- Monkeygrease Rule Begin: " + this.getName() + " "
 					+ this.strInsertAt + " -->\n" + this.elements;
-			sRule += "<!-- Monkeygrease Rule End -->\n";
+			sRule += "<!-- Monkeygrease Rule End -->";
 		} else {
 			sRule += this.elements;
 		}
@@ -202,19 +133,15 @@ public class Rule {
 	public void setInsertAt(String strInsertAt) {
 		if (strInsertAt.equals("head-begin".toLowerCase())) {
 			insertAt = InsertAt.HEAD_BEGIN;
-			return;
 		}
 		if (strInsertAt.equals("head-end".toLowerCase())) {
 			insertAt = InsertAt.HEAD_END;
-			return;
 		}
 		if (strInsertAt.equals("body-begin".toLowerCase())) {
 			insertAt = InsertAt.BODY_BEGIN;
-			return;
 		}
 		if (strInsertAt.equals("body-end".toLowerCase())) {
 			insertAt = InsertAt.BODY_END;
-			return;
 		}
 	}
 }

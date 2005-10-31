@@ -4,8 +4,8 @@
 package org.manalang.monkeygrease.utils;
 
 /**
- * @author rmanalan
- *
+ * @author Rich Manalang
+ * @version 0.11 Build 233 Oct 28, 2005 00:16 GMT
  */
 public class InsertAt {
 	public final static int HEAD_BEGIN = 0;

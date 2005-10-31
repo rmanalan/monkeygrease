@@ -26,7 +26,7 @@ import javax.servlet.ServletOutputStream;
 
 /**
  * @author Rich Manalang
- * @version 0.10 Build 173 Oct 25, 2005 23:45 GMT
+ * @version 0.11 Build 233 Oct 28, 2005 00:16 GMT
  */
 public class FilterServletOutputStream extends ServletOutputStream {
 	private DataOutputStream stream;
