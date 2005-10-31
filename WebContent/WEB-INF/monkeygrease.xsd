@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://monkeygrease.org"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://monkeygrease.org">
+	<element name="monkeygrease">
+		<complexType>
+			<sequence maxOccurs="unbounded" minOccurs="0">
+			
+						<element name="rule" maxOccurs="unbounded" minOccurs="0">
+							<complexType>
+								<sequence minOccurs="0" maxOccurs="unbounded">
+									<any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"></any>
+								</sequence>
+								<attribute name="url-pattern"
+									type="string">
+								</attribute>
+								<attribute name="name"
+									type="string">
+								</attribute>
+								<attribute name="enabled"
+									type="boolean">
+								</attribute>
+								<attribute name="insert-at"
+									type="string">
+								</attribute>
+							</complexType>
+						</element></sequence>
+		</complexType>
+	</element>
+
+</schema>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mg:monkeygrease xmlns:mg="http://monkeygrease.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://monkeygrease.org monkeygrease.xsd ">
+  <rule enabled="true" name="Sample rule 1" url-pattern="/.*" insert-at="head-begin">
+    <item type="javascript">/dojo/dojo.js</item>
+    <item type="css">/css/css1.css</item>
+    <item type="css">/css/css2.css</item>
+    <script type="text/javascript">alert("hello");</script>
+  </rule>
+  <rule enabled="true" name="Sample rule 2" url-pattern="/.*" insert-at="head-end">
+    <item type="javascript">/dojo/dojo.js</item>
+    <item type="css">/css/css1.css</item>
+    <item type="css">/css/css2.css</item>
+  </rule>
+  <rule enabled="true" name="Sample rule 3" url-pattern="/.*" insert-at="body-begin">
+    <item type="javascript">/dojo/dojo.js</item>
+    <item type="css">/css/css1.css</item>
+    <item type="css">/css/css2.css</item>
+  </rule>
+  <rule enabled="true" name="Sample rule 4" url-pattern="/.*" insert-at="body-end">
+    <item type="javascript">/dojo/dojo.js</item>
+    <item type="css">/css/css1.css</item>
+    <item type="css">/css/css2.css</item>
+  </rule>
+</mg:monkeygrease>

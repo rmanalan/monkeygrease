@@ -1,0 +1,69 @@
+<project name="Build Monkeygrease" default="all" basedir=".">
+	<buildnumber/>
+	<property file="build.properties" />
+	<tstamp>
+		<format property="now" pattern="MMM dd, yyyy HH:mm z" locale="en" timezone="GMT" />
+	</tstamp>
+	<path id="classpath">
+		<!-- Include all elements that Tomcat exposes to applications -->
+		<fileset file="${java.home}/lib/*.jar" />
+		<fileset file="${tomcat.home}/common/lib/servlet-api.jar" />
+	</path>
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${output.dir}" />
+		<mkdir dir="${output.dir}/classes" />
+		<mkdir dir="${output.dir}/classes/META-INF" />
+		<mkdir dir="${output.dir}/WEB-INF" />
+		<mkdir dir="${output.dir}/WEB-INF/lib" />
+		<mkdir dir="${output.dir}/dist" />
+	</target>
+	<target name="all" description="Build the project" depends="clean,compile,copy" />
+	<target name="clean" description="Clean the project">
+		<delete includeemptydirs="true" quiet="true">
+			<fileset dir="${output.dir}" includes="**/*" />
+			<fileset dir="${output.dir}" includes="${basedir}/WebContent/WEB-INF/lib/monkeygrease.jar" />
+		</delete>
+	</target>
+	<target name="compile" description="Compile Java source files" depends="init">
+		<replaceregexp match="@version.*" replace="@version ${app.version} Build ${build.number} ${now}">
+			<fileset dir="JavaSource">
+				<include name="**/*.java" />
+			</fileset>
+		</replaceregexp>
+		<javac destdir="${output.dir}/classes" classpathref="classpath" debug="${javac.debug}" nowarn="${javac.nowarn}" deprecation="${javac.deprecation}" encoding="Cp1252">
+			<src path="JavaSource" />
+		</javac>
+		<manifest file="${output.dir}/classes/META-INF/manifest.mf">
+			<attribute name="Built-By" value="${user.name}" />
+			<section name="common">
+				<attribute name="Extension-Name" value="${app.name}" />
+				<attribute name="Specification-Title" value="${app.name}" />
+				<attribute name="Specification-Version" value="${app.version}" />
+				<attribute name="Specification-Vendor" value="${app.author}" />
+				<attribute name="Implementation-Title" value="${app.name}" />
+				<attribute name="Implementation-Version" value="${app.version}" />
+				<attribute name="Implementation-Vendor" value="${app.author}" />
+			</section>
+		</manifest>
+		<copy file="LICENSE.txt" todir="${output.dir}/classes/META-INF" />
+		<jar destfile="${output.dir}/WEB-INF/lib/monkeygrease.jar" basedir="${output.dir}/classes" manifest="${output.dir}/classes/META-INF/manifest.mf" />
+	</target>
+	<target name="copy" description="Copy files to output directory" depends="init">
+		<copy file="${output.dir}/WEB-INF/lib/monkeygrease.jar" todir="WebContent/WEB-INF/lib" />
+	</target>
+	<target name="javadoc">
+		<javadoc access="public" author="true" classpath="classpath" 
+			destdir="${output.dir}/doc" doctitle="Monkeygrease" 
+			nodeprecated="false" nodeprecatedlist="false" noindex="false" 
+			nonavbar="false" notree="false" packagenames="org.manalang.monkeygrease,org.manalang.monkeygrease.utils" source="1.5" sourcepath="JavaSource" splitindex="true" use="true" version="true" />
+	</target>
+	<target name="dist-bin">
+
+	</target>
+	<target name="dist-src">
+
+	</target>
+
+
+</project>
