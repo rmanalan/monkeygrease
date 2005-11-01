@@ -103,7 +103,7 @@ import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
  * </p>
  * 
  * @author Rich Manalang
- * @version 0.11 Build 233 Oct 28, 2005 00:16 GMT
+ * @version 0.11 Build 247 Nov 01, 2005 21:16 GMT
  */
 public class MonkeygreaseFilter implements Filter {
 
@@ -397,13 +397,20 @@ public class MonkeygreaseFilter implements Filter {
 			case InsertAt.BODY_BEGIN:
 				if (tagsToInsert != "") {
 					Pattern p = Pattern.compile("<body[^>]*>",
-							Pattern.CASE_INSENSITIVE);
+							Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
+									| Pattern.DOTALL);
 					Matcher m = p.matcher(modResponse);
 					StringBuffer sb = new StringBuffer();
 					while (m.find()) {
-						if (m.group() != null) {
-							m.appendReplacement(sb, m.group() + "\n"
-									+ tagsToInsert);
+						String origBody = m.group();
+						if (origBody != null) {
+							// make sure we replace any dollar signs that may be
+							// in the body content... else appendReplacement
+							// will interpret them as insertion points
+							m.appendReplacement(sb, origBody.replaceAll("\\$",
+									"\\\\\\$")
+									+ "\n" + tagsToInsert);
+							break;
 						}
 					}
 					m.appendTail(sb);

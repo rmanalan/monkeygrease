@@ -15,7 +15,7 @@
 		<mkdir dir="${output.dir}/WEB-INF/lib" />
 		<mkdir dir="${output.dir}/dist" />
 	</target>
-	<target name="all" description="Build the project" depends="clean,compile,copy,javadoc,dist-bin,dist-src,clean-build-dir" />
+	<target name="all" description="Build the project" depends="clean,compile,copy,javadoc,dist-bin,dist-src,clean-build-dir,copy-to-scm-dir" />
 	<target name="clean" description="Clean the project">
 		<delete includeemptydirs="true" quiet="true">
 			<fileset dir="${output.dir}" includes="**/*" />
@@ -118,6 +118,15 @@
 		<delete includeemptydirs="true" dir="${output.dir}/classes" />
 		<delete includeemptydirs="true" dir="${output.dir}/WEB-INF" />
 	</target>
-
-
+	<target name="copy-to-scm-dir">
+		<copy todir="${scm.dir}">
+			<fileset dir="${basedir}">
+				<include name="JavaSource/**/*.java" />
+				<include name="WebContent/**/*" />
+				<include name="*" />
+				<exclude name=".*" />
+				<exclude name="build" />
+			</fileset>
+		</copy>
+	</target>
 </project>

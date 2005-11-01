@@ -6,11 +6,6 @@
 		insert-at="head-begin">
 		<![CDATA[
 		<script type="text/javascript" src="/dojo/dojo.js">&nbsp;</script>
-		<script type="text/javascript">
-		for (i=0;i<10;i++) {
-			alert(i);
-		}
-		</script>
 		<link href="css.css" rel="stylesheet" type="text/css" />
 		]]>
 	</rule>
@@ -32,4 +27,5 @@
 		<div style="background:red">End of body</div>
 		]]>
 	</rule>
+
 </mg:monkeygrease>
