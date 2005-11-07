@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mg:monkeygrease xmlns:mg="http://monkeygrease.org"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://monkeygrease.org monkeygrease.xsd ">
+	xsi:schemaLocation="http://monkeygrease.org http://monkeygrease.org/monkeygrease.xsd ">
 	<rule enabled="true" name="Sample rule 1" url-pattern="/.*"
 		insert-at="head-begin">
 		<![CDATA[
