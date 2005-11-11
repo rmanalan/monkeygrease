@@ -8,6 +8,7 @@
 		<!-- Include all elements that Tomcat exposes to applications -->
 		<fileset file="${java.home}/lib/*.jar" />
 		<fileset file="${tomcat.home}/common/lib/servlet-api.jar" />
+		<fileset file="${httpclient.home}/*.jar" />
 	</path>
 	<target name="init">
 		<tstamp />
@@ -61,18 +62,17 @@
 		<javadoc access="public" author="true" classpath="classpath" destdir="${output.dir}/api" doctitle="Monkeygrease" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="org.manalang.monkeygrease,org.manalang.monkeygrease.utils" source="1.5" sourcepath="JavaSource" splitindex="true" use="true" version="true" />
 	</target>
 	<target name="dist-bin">
-		<mkdir dir="${output.dir}/dist/bin" />
-		<copy file="${output.dir}/WEB-INF/lib/monkeygrease.jar" todir="${output.dir}/dist/bin" />
-		<copy file="${basedir}/WebContent/WEB-INF/monkeygrease.xsd" todir="${output.dir}/dist/bin" />
-		<copy file="${basedir}/WebContent/WEB-INF/monkeygrease.xml" todir="${output.dir}/dist/bin" />
-		<copy file="${basedir}/LICENSE.txt" todir="${output.dir}/dist/bin" />
+		<mkdir dir="${output.dir}/dist/bin/monkeygrease" />
+		<copy file="${output.dir}/WEB-INF/lib/monkeygrease.jar" todir="${output.dir}/dist/bin/monkeygrease" />
+		<copy file="${basedir}/WebContent/WEB-INF/monkeygrease.xml" todir="${output.dir}/dist/bin/monkeygrease" />
+		<copy file="${basedir}/LICENSE.txt" todir="${output.dir}/dist/bin/monkeygrease" />
 		<zip destfile="${output.dir}/dist/bin/${app.name}-${app.version}.zip">
 			<fileset dir="${output.dir}/dist/bin" excludes="${app.name}-${app.version}.zip" />
 		</zip>
 		<tar basedir="${output.dir}/dist/bin" compression="gzip" destfile="${output.dir}/dist/bin/${app.name}-${app.version}.tar.gz" excludes="${app.name}-${app.version}.zip" />
 		<checksum file="${output.dir}/dist/bin/${app.name}-${app.version}.zip" fileext=".md5.txt" />
 		<checksum file="${output.dir}/dist/bin/${app.name}-${app.version}.tar.gz" fileext=".md5.txt" />
-		<delete>
+		<delete includeemptydirs="true" >
 			<fileset dir="${output.dir}/dist/bin">
 				<exclude name="**/*.zip" />
 				<exclude name="**/*.tar.gz" />
@@ -81,16 +81,16 @@
 		</delete>
 	</target>
 	<target name="dist-src">
-		<copy todir="${output.dir}/dist/src/api">
+		<copy todir="${output.dir}/dist/src/monkeygrease/api">
 			<fileset dir="${output.dir}/api" />
 		</copy>
-		<copy todir="${output.dir}/dist/src/java">
+		<copy todir="${output.dir}/dist/src/monkeygrease/java">
 			<fileset dir="${basedir}/JavaSource" />
 		</copy>
-		<copy todir="${output.dir}/dist/src/WEB-INF">
+		<copy todir="${output.dir}/dist/src/monkeygrease/WEB-INF">
 			<fileset dir="${output.dir}/WEB-INF" />
 		</copy>
-		<copy todir="${output.dir}/dist/src">
+		<copy todir="${output.dir}/dist/src/monkeygrease">
 			<fileset dir="${basedir}">
 				<include name="build.*"/>
 				<include name="LICENSE.txt"/>
@@ -102,10 +102,10 @@
 		<tar basedir="${output.dir}/dist/src" compression="gzip"  destfile="${output.dir}/dist/src/${app.name}-${app.version}.src.tar.gz" excludes="${app.name}-${app.version}.src.zip" />
 		<checksum file="${output.dir}/dist/src/${app.name}-${app.version}.src.zip" fileext=".md5.txt" />
 		<checksum file="${output.dir}/dist/src/${app.name}-${app.version}.src.tar.gz" fileext=".md5.txt" />
-		<delete includeemptydirs="true" dir="${output.dir}/dist/src/api" />
-		<delete includeemptydirs="true" dir="${output.dir}/dist/src/java" />
-		<delete includeemptydirs="true" dir="${output.dir}/dist/src/WEB-INF" />
-		<delete>
+		<delete includeemptydirs="true" dir="${output.dir}/dist/src/monkeygrease/api" />
+		<delete includeemptydirs="true" dir="${output.dir}/dist/src/monkeygrease/java" />
+		<delete includeemptydirs="true" dir="${output.dir}/dist/src/monkeygrease/WEB-INF" />
+		<delete includeemptydirs="true" >
 			<fileset dir="${output.dir}/dist/src">
 				<exclude name="**/*.zip" />
 				<exclude name="**/*.tar.gz" />

@@ -2,26 +2,26 @@
 <mg:monkeygrease xmlns:mg="http://monkeygrease.org"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://monkeygrease.org http://monkeygrease.org/monkeygrease.xsd ">
-	<rule enabled="true" name="Sample rule 1" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 1" url-pattern="/.*"
 		insert-at="head-begin">
 		<![CDATA[
 		<script type="text/javascript" src="/dojo/dojo.js">&nbsp;</script>
 		<link href="css.css" rel="stylesheet" type="text/css" />
 		]]>
 	</rule>
-	<rule enabled="true" name="Sample rule 2" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 2" url-pattern="/.*"
 		insert-at="head-begin">
 		<![CDATA[
 		<title>This page has been monkeygrease'd</title>
 		]]>
 	</rule>
-	<rule enabled="true" name="Sample rule 3" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 3" url-pattern="/.*"
 		insert-at="body-begin">
 		<![CDATA[
 		<div style="background:green">beginning of body</div>
 		]]>
 	</rule>
-	<rule enabled="true" name="Sample rule 4" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 4" url-pattern="/.*"
 		insert-at="body-end">
 		<![CDATA[
 		<div style="background:red">End of body</div>

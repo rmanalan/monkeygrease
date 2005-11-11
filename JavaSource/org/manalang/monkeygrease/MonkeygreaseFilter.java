@@ -103,7 +103,7 @@ import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
  * </p>
  * 
  * @author Rich Manalang
- * @version 0.11 Build 249 Nov 07, 2005 19:21 GMT
+ * @version 0.12 Build 260 Nov 11, 2005 01:11 GMT
  */
 public class MonkeygreaseFilter implements Filter {
 
