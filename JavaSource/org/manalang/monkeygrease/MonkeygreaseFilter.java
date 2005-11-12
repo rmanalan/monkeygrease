@@ -2,19 +2,23 @@
  * Monkeygrease
  * Copyright (C) 2005 Rich Manalang
  * 
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
- * version.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy 
+ * of this software and associated documentation files (the "Software"), to deal 
+ * in the Software without restriction, including without limitation the rights 
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+ * copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions:
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
  * 
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+ * SOFTWARE.
  */
 package org.manalang.monkeygrease;
 
@@ -103,7 +107,7 @@ import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
  * </p>
  * 
  * @author Rich Manalang
- * @version 0.12 Build 260 Nov 11, 2005 01:11 GMT
+ * @version 0.12 Build 262 Nov 12, 2005 00:02 GMT
  */
 public class MonkeygreaseFilter implements Filter {
 
@@ -156,7 +160,7 @@ public class MonkeygreaseFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 
 		try {
-			fh = new FileHandler("monkeygrease%u.log");
+			fh = new FileHandler("monkeygrease_%u.log");
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -249,6 +253,12 @@ public class MonkeygreaseFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		if (fc == null)
 			return;
+		
+        HttpServletRequest hreq = (HttpServletRequest)request;
+        
+        // Exit if request is for XHR proxy servlet
+        if(hreq.getRequestURI().equals("/monkeygreaseproxy"))
+            return;
 
 		log.info("*** Request Processing Begins ***");
 
@@ -296,8 +306,6 @@ public class MonkeygreaseFilter implements Filter {
 				out.close();
 				return;
 			}
-
-			HttpServletRequest hreq = (HttpServletRequest) request;
 
 			log.info("Number of rules loaded: " + rules.size());
 
@@ -366,6 +374,10 @@ public class MonkeygreaseFilter implements Filter {
 	public String processResponse(String strResponse, Rules rulesToApply) {
 		String tagsToInsert = "";
 		String modResponse = strResponse;
+		String headBeginMarker = "<!-- mg#head#begin#marker -->";
+		String bodyBeginMarker = "<!-- mg#body#begin#marker -->";
+		boolean headBeginInserted = false;
+		boolean bodyBeginInserted = false;
 
 		Iterator rulesToApplyIter = rulesToApply.iterator();
 		while (rulesToApplyIter.hasNext()) {
@@ -373,13 +385,26 @@ public class MonkeygreaseFilter implements Filter {
 			tagsToInsert = ruleToApply.toString();
 			switch (ruleToApply.getInsertAt()) {
 			case InsertAt.HEAD_BEGIN:
-				if (tagsToInsert != "") {
-					tagsToInsert = "<head>\n" + tagsToInsert;
-					modResponse = findAndReplace(tagsToInsert, modResponse,
-							"<head>");
-					log.fine("<head> found... inserting rule");
+				if (!headBeginInserted) {
+					if (tagsToInsert != "") {
+						tagsToInsert = "<head>\n" + tagsToInsert
+								+ headBeginMarker;
+						modResponse = findAndReplace(tagsToInsert, modResponse,
+								"<head>");
+						headBeginInserted = true;
+						log.fine("<head> found... inserting rule");
+					} else {
+						log.fine("No <head> found");
+					}
 				} else {
-					log.fine("No <head> found");
+					if (tagsToInsert != "") {
+						tagsToInsert = tagsToInsert + headBeginMarker;
+						modResponse = findAndReplace(tagsToInsert, modResponse,
+								headBeginMarker);
+						log.fine("<head> found... inserting rule");
+					} else {
+						log.fine("No <head> found");
+					}
 				}
 				break;
 
@@ -395,29 +420,40 @@ public class MonkeygreaseFilter implements Filter {
 				break;
 
 			case InsertAt.BODY_BEGIN:
-				if (tagsToInsert != "") {
-					Pattern p = Pattern.compile("<body[^>]*>",
-							Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
-									| Pattern.DOTALL);
-					Matcher m = p.matcher(modResponse);
-					StringBuffer sb = new StringBuffer();
-					while (m.find()) {
-						String origBody = m.group();
-						if (origBody != null) {
-							// make sure we replace any dollar signs that may be
-							// in the body content... else appendReplacement
-							// will interpret them as insertion points
+				if (!bodyBeginInserted) {
+					if (tagsToInsert != "") {
+						Pattern p = Pattern.compile("<body[^>]*>",
+								Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
+										| Pattern.DOTALL);
+						Matcher m = p.matcher(modResponse);
+						StringBuffer sb = new StringBuffer();
+						do {
+							if (!m.find())
+								break;
+							String origBody = m.group();
+							if (origBody == null)
+								continue;
 							m.appendReplacement(sb, origBody.replaceAll("\\$",
 									"\\\\\\$")
-									+ "\n" + tagsToInsert);
+									+ "\n" + tagsToInsert + bodyBeginMarker);
 							break;
-						}
+						} while (true);
+						m.appendTail(sb);
+						modResponse = sb.toString();
+						bodyBeginInserted = true;
+						log.fine("<body> found... inserting rule");
+					} else {
+						log.fine("No <body> found");
 					}
-					m.appendTail(sb);
-					modResponse = sb.toString();
-					log.fine("<body> found... inserting rule");
 				} else {
-					log.fine("No <body> found");
+					if (tagsToInsert != "") {
+						tagsToInsert = tagsToInsert + bodyBeginMarker;
+						modResponse = findAndReplace(tagsToInsert, modResponse,
+								bodyBeginMarker);
+						log.fine("<body> found... inserting rule");
+					} else {
+						log.fine("No <body> found");
+					}
 				}
 				break;
 
@@ -434,10 +470,9 @@ public class MonkeygreaseFilter implements Filter {
 			}
 		}
 
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-				DateFormat.LONG);
-
 		if (COMMENTS_ON) {
+			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+					DateFormat.LONG);
 			modResponse = "<!-- This page has been Monkeygrease'd (Config file last loaded on "
 					+ df.format(new Date(confLastLoad))
 					+ ") -->\n"
