@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * response object in the Monkeygrease filter.
  * 
  * @author Rich Manalang
- * @version 0.12 Build 262 Nov 12, 2005 00:02 GMT
+ * @version 0.12 Build 266 Jan 13, 2006 23:11 GMT
  */
 public class MonkeygreaseResponseWrapper
    extends HttpServletResponseWrapper
