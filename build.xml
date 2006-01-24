@@ -25,17 +25,17 @@
 	</target>
 	<target name="compile" description="Compile Java source files" depends="init">
 		<replaceregexp match="@version.*" replace="@version ${app.version} Build ${build.number} ${now}">
-			<fileset dir="JavaSource">
+			<fileset dir="src">
 				<include name="**/*.java" />
 			</fileset>
 		</replaceregexp>
 		<replaceregexp match="@author.*" replace="@author ${app.author}">
-			<fileset dir="JavaSource">
+			<fileset dir="src">
 				<include name="**/*.java" />
 			</fileset>
 		</replaceregexp>
 		<javac destdir="${output.dir}/classes" classpathref="classpath" debug="${javac.debug}" nowarn="${javac.nowarn}" deprecation="${javac.deprecation}" encoding="Cp1252">
-			<src path="JavaSource" />
+			<src path="src" />
 		</javac>
 		<manifest file="${output.dir}/classes/META-INF/manifest.mf">
 			<attribute name="Built-By" value="${user.name}" />
@@ -59,7 +59,7 @@
 		</copy>
 	</target>
 	<target name="javadoc">
-		<javadoc access="public" author="true" classpath="classpath" destdir="${output.dir}/api" doctitle="Monkeygrease" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="org.manalang.monkeygrease,org.manalang.monkeygrease.utils" source="1.5" sourcepath="JavaSource" splitindex="true" use="true" version="true" />
+		<javadoc access="public" author="true" classpath="classpath" destdir="${output.dir}/api" doctitle="Monkeygrease" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="org.manalang.monkeygrease,org.manalang.monkeygrease.utils" source="1.5" sourcepath="src" splitindex="true" use="true" version="true" />
 	</target>
 	<target name="dist-bin">
 		<mkdir dir="${output.dir}/dist/bin/monkeygrease" />
@@ -85,7 +85,7 @@
 			<fileset dir="${output.dir}/api" />
 		</copy>
 		<copy todir="${output.dir}/dist/src/monkeygrease/java">
-			<fileset dir="${basedir}/JavaSource" />
+			<fileset dir="${basedir}/src" />
 		</copy>
 		<copy todir="${output.dir}/dist/src/monkeygrease/WEB-INF">
 			<fileset dir="${output.dir}/WEB-INF" />
@@ -121,7 +121,7 @@
 	<target name="copy-to-scm-dir">
 		<copy todir="${scm.dir}">
 			<fileset dir="${basedir}">
-				<include name="JavaSource/**/*.java" />
+				<include name="src/**/*.java" />
 				<include name="WebContent/**/*" />
 				<include name="*" />
 				<exclude name=".*" />
