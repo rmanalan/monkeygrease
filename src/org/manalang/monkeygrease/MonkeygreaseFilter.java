@@ -107,7 +107,7 @@ import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
  * </p>
  * 
  * @author Rich Manalang
- * @version 0.12 Build 270 Jan 24, 2006 17:40 GMT
+ * @version 0.12 Build 271 Jan 26, 2006 18:40 GMT
  */
 public class MonkeygreaseFilter implements Filter {
 
@@ -268,6 +268,13 @@ public class MonkeygreaseFilter implements Filter {
 		// Create response wrapper so we can modify the original response
 		MonkeygreaseResponseWrapper wrappedResponse = new MonkeygreaseResponseWrapper(
 				(HttpServletResponse) response);
+		
+		// Exit if original response has a Content-Encoding header...
+		// this prevents Monkeygrease from processing gzipped content.
+		// There doesn't seem to be a way to get the actual value of 
+		// a response header... need to look into this more.
+		if (wrappedResponse.containsHeader("Content-Encoding"))
+			return;
 
 		// Process request, return response to wrappedResponse
 		chain.doFilter(request, wrappedResponse);
