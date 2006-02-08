@@ -44,6 +44,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.manalang.monkeygrease.utils.InsertAt;
 import org.manalang.monkeygrease.utils.LogFormatter;
 import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
@@ -107,7 +108,7 @@ import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
  * </p>
  * 
  * @author Rich Manalang
- * @version 0.12 Build 271 Jan 26, 2006 18:40 GMT
+ * @version 0.12 Build 280 Feb 08, 2006 22:23 GMT
  */
 public class MonkeygreaseFilter implements Filter {
 
@@ -145,11 +146,15 @@ public class MonkeygreaseFilter implements Filter {
 
 	private long confLastLoad;
 
+	public static HttpClient client;
+
 	public static boolean COMMENTS_ON;
 
 	public static Logger log = Logger.getLogger("org.manalang.monkeygrease");
 
 	private static FileHandler fh;
+
+	public static String remoteConfigURL;
 
 	/**
 	 * Initializes Monkeygrease. Internal servlet filter method.
@@ -182,6 +187,9 @@ public class MonkeygreaseFilter implements Filter {
 			logLevelInt = Integer.parseInt(logLevel);
 		else
 			logLevelInt = 0;
+		remoteConfigURL = fc.getInitParameter("remoteConfigURL");
+		if (remoteConfigURL != "")
+			client = new HttpClient();
 
 		switch (logLevelInt) {
 		case SEVERE:
@@ -293,15 +301,22 @@ public class MonkeygreaseFilter implements Filter {
 				confReloadLastCheck = now;
 
 				log.fine("starting conf reload check");
-				long confFileCurrentTime = getConfFileLastModified();
-				if (confLastLoad < confFileCurrentTime) {
-					// reload conf
-					confLastLoad = System.currentTimeMillis();
-					log.config("Conf file modified since last load, reloading");
+				
+				if (remoteConfigURL == "") {
+					long confFileCurrentTime = getConfFileLastModified();
+					if (confLastLoad < confFileCurrentTime) {
+						// reload conf
+						confLastLoad = System.currentTimeMillis();
+						log.config("Conf file modified since last load, reloading");
+						cf.load();
+						rules = cf.getRules();
+					} else {
+						log.config("Conf is not modified");
+					}
+				} else {
+					log.config("Conf file reloading from remote URL");
 					cf.load();
 					rules = cf.getRules();
-				} else {
-					log.config("Conf is not modified");
 				}
 
 				confReloadInProgress = false;

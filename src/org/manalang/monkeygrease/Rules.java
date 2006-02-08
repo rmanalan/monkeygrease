@@ -25,6 +25,10 @@ package org.manalang.monkeygrease;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * @author Rich Manalang
+ * @version 0.12 Build 280 Feb 08, 2006 22:23 GMT
+ */
 public class Rules extends ArrayList {
 
 	private static final long serialVersionUID = 1L;

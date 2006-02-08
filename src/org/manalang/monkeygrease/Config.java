@@ -21,7 +21,8 @@
  * SOFTWARE.
  */
 package org.manalang.monkeygrease;
- 
+
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
@@ -29,6 +30,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -48,14 +54,40 @@ public class Config {
 	}
 
 	public synchronized void load() {
-		InputStream is = context.getResourceAsStream(DEFAULT_WEB_CONF_FILE);
+		
+		InputStream is = null;
+		GetMethod method = null;
 
-		if (is == null) {
-			System.out.println("unable to find monkeygrease conf file "
-					+ DEFAULT_WEB_CONF_FILE);
-			return;
+		if (MonkeygreaseFilter.remoteConfigURL != "") {
+			method = new GetMethod(MonkeygreaseFilter.remoteConfigURL);
+			method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
+					new DefaultHttpMethodRetryHandler(3, false));
+			try {
+				// Execute the method.
+				int statusCode = MonkeygreaseFilter.client.executeMethod(method);
+
+				if (statusCode != HttpStatus.SC_OK) {
+					MonkeygreaseFilter.log.severe("Method failed: "
+							+ method.getStatusLine());
+				}
+				is = method.getResponseBodyAsStream();
+			} catch (HttpException e) {
+				MonkeygreaseFilter.log.severe("Fatal protocol violation: "
+						+ e.getMessage());
+			} catch (IOException e) {
+				MonkeygreaseFilter.log.severe("Fatal transport error: "
+						+ e.getMessage());
+			}
+
+		} else {
+			is = context.getResourceAsStream(DEFAULT_WEB_CONF_FILE);
+
+			if (is == null) {
+				System.out.println("unable to find monkeygrease conf file "
+						+ DEFAULT_WEB_CONF_FILE);
+			}
 		}
-
+		
 		DocumentBuilder parser;
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -66,8 +98,9 @@ public class Config {
 		try {
 			parser = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			MonkeygreaseFilter.log.severe("Unable to setup XML parser for reading conf "
-					+ e.toString());
+			MonkeygreaseFilter.log
+					.severe("Unable to setup XML parser for reading conf "
+							+ e.toString());
 			return;
 		}
 
@@ -76,6 +109,10 @@ public class Config {
 
 		try {
 			Document doc = parser.parse(is);
+			
+			if (MonkeygreaseFilter.remoteConfigURL != "")
+				method.releaseConnection();
+
 			NodeList rulesConf = doc.getElementsByTagName("rule");
 			rules = new Rules();
 
@@ -87,18 +124,19 @@ public class Config {
 			}
 			// processConfDoc(doc);
 		} catch (SAXParseException e) {
-			MonkeygreaseFilter.log.severe("Parse error on line " + e.getLineNumber() + " "
-					+ e.toString());
+			MonkeygreaseFilter.log.severe("Parse error on line "
+					+ e.getLineNumber() + " " + e.toString());
 		} catch (Exception e) {
-			MonkeygreaseFilter.log.severe("Exception loading conf " + " " + e.toString());
+			MonkeygreaseFilter.log.severe("Exception loading conf " + " "
+					+ e.toString());
 		}
 	}
 
 	public Rules getRules() {
 		return rules;
 	}
-	
-	public String getDEFAULT_WEB_CONF_FILE(){
+
+	public String getDEFAULT_WEB_CONF_FILE() {
 		return DEFAULT_WEB_CONF_FILE;
 	}
 }

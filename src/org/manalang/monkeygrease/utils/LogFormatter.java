@@ -29,7 +29,7 @@ import java.util.logging.LogRecord;
 
 /**
  * @author Rich Manalang
- * @version 0.12 Build 271 Jan 26, 2006 18:40 GMT
+ * @version 0.12 Build 280 Feb 08, 2006 22:23 GMT
  */
 public class LogFormatter extends Formatter {
 	
