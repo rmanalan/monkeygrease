@@ -64,6 +64,9 @@
 	<target name="dist-bin">
 		<mkdir dir="${output.dir}/dist/bin/monkeygrease" />
 		<copy file="${output.dir}/WEB-INF/lib/monkeygrease.jar" todir="${output.dir}/dist/bin/monkeygrease" />
+		<copy todir="${output.dir}/dist/bin/monkeygrease">
+			<fileset dir="${output.dir}/WEB-INF/lib/" includes="*.jar" />
+		</copy>
 		<copy file="${basedir}/WebContent/WEB-INF/monkeygrease.xml" todir="${output.dir}/dist/bin/monkeygrease" />
 		<copy file="${basedir}/LICENSE.txt" todir="${output.dir}/dist/bin/monkeygrease" />
 		<zip destfile="${output.dir}/dist/bin/${app.name}-${app.version}.zip">
@@ -72,7 +75,7 @@
 		<tar basedir="${output.dir}/dist/bin" compression="gzip" destfile="${output.dir}/dist/bin/${app.name}-${app.version}.tar.gz" excludes="${app.name}-${app.version}.zip" />
 		<checksum file="${output.dir}/dist/bin/${app.name}-${app.version}.zip" fileext=".md5.txt" />
 		<checksum file="${output.dir}/dist/bin/${app.name}-${app.version}.tar.gz" fileext=".md5.txt" />
-		<delete includeemptydirs="true" >
+		<delete includeemptydirs="true">
 			<fileset dir="${output.dir}/dist/bin">
 				<exclude name="**/*.zip" />
 				<exclude name="**/*.tar.gz" />
@@ -92,20 +95,20 @@
 		</copy>
 		<copy todir="${output.dir}/dist/src/monkeygrease">
 			<fileset dir="${basedir}">
-				<include name="build.*"/>
-				<include name="LICENSE.txt"/>
+				<include name="build.*" />
+				<include name="LICENSE.txt" />
 			</fileset>
 		</copy>
 		<zip destfile="${output.dir}/dist/src/${app.name}-${app.version}.src.zip">
 			<fileset dir="${output.dir}/dist/src" excludes="${app.name}-${app.version}.zip" />
 		</zip>
-		<tar basedir="${output.dir}/dist/src" compression="gzip"  destfile="${output.dir}/dist/src/${app.name}-${app.version}.src.tar.gz" excludes="${app.name}-${app.version}.src.zip" />
+		<tar basedir="${output.dir}/dist/src" compression="gzip" destfile="${output.dir}/dist/src/${app.name}-${app.version}.src.tar.gz" excludes="${app.name}-${app.version}.src.zip" />
 		<checksum file="${output.dir}/dist/src/${app.name}-${app.version}.src.zip" fileext=".md5.txt" />
 		<checksum file="${output.dir}/dist/src/${app.name}-${app.version}.src.tar.gz" fileext=".md5.txt" />
 		<delete includeemptydirs="true" dir="${output.dir}/dist/src/monkeygrease/api" />
 		<delete includeemptydirs="true" dir="${output.dir}/dist/src/monkeygrease/java" />
 		<delete includeemptydirs="true" dir="${output.dir}/dist/src/monkeygrease/WEB-INF" />
-		<delete includeemptydirs="true" >
+		<delete includeemptydirs="true">
 			<fileset dir="${output.dir}/dist/src">
 				<exclude name="**/*.zip" />
 				<exclude name="**/*.tar.gz" />

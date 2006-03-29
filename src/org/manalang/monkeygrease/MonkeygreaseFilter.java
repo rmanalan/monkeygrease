@@ -1,6 +1,6 @@
 /**
  * Monkeygrease
- * Copyright (C) 2005 Rich Manalang
+ * Copyright (C) 2005-2006 Rich Manalang
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy 
  * of this software and associated documentation files (the "Software"), to deal 
@@ -108,7 +108,7 @@ import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
  * </p>
  * 
  * @author Rich Manalang
- * @version 0.12 Build 281 Feb 20, 2006 16:54 GMT
+ * @version 0.13 Build 285 Mar 07, 2006 19:21 GMT
  */
 public class MonkeygreaseFilter implements Filter {
 
@@ -188,7 +188,7 @@ public class MonkeygreaseFilter implements Filter {
 		else
 			logLevelInt = 0;
 		remoteConfigURL = fc.getInitParameter("remoteConfigURL");
-		if (remoteConfigURL != "")
+		if (remoteConfigURL != "" && remoteConfigURL != null)
 			client = new HttpClient();
 
 		switch (logLevelInt) {
