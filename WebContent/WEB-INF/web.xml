@@ -4,8 +4,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>Monkeygrease</display-name>
-	
-	
+
+
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>
@@ -31,24 +31,24 @@
 			<param-name>logLevel</param-name>
 			<param-value>6</param-value>
 		</init-param>
-		<init-param>
+<!--	<init-param>
 			<param-name>remoteConfigURL</param-name>
-			<param-value>http://localhost/monkeygrease.xml</param-value>
-		</init-param>
+			<param-value>http://localhost:8080/monkeygrease.xml</param-value>
+		</init-param> -->
 	</filter>
 	<filter-mapping>
 		<filter-name>Monkeygrease</filter-name>
 		<url-pattern>/*</url-pattern>
-	</filter-mapping><servlet>
-		<description>
-			Used by Monkeygrease to allow for cross-domain
-			XMLHttpRequest calls
-		</description>
+	</filter-mapping>
+	<servlet>
+		<description>Used by Monkeygrease to allow for cross-domain
+ XMLHttpRequest calls</description>
 		<display-name>Monkeygrease Proxy Client</display-name>
 		<servlet-name>MonkeygreaseProxyClient</servlet-name>
 		<servlet-class>
 			org.manalang.monkeygrease.utils.HttpClient
-		</servlet-class><!--Comment out the following init params if you don't want to use an HTTP proxy-->
+		</servlet-class>
+		<!--Comment out the following init params if you don't want to use an HTTP proxy
 		<init-param>
 			<param-name>ProxyHost</param-name>
 			<param-value></param-value>
@@ -56,9 +56,10 @@
 		<init-param>
 			<param-name>ProxyPort</param-name>
 			<param-value></param-value>
-		</init-param>
-	</servlet><servlet-mapping>
+		</init-param>-->
+	</servlet>
+	<servlet-mapping>
 		<servlet-name>MonkeygreaseProxyClient</servlet-name>
-		<url-pattern>/monkeygreaseproxy</url-pattern>
+		<url-pattern>/monkeygreaseproxy/*</url-pattern>
 	</servlet-mapping>
 </web-app>

@@ -58,7 +58,8 @@ public class Config {
 		InputStream is = null;
 		GetMethod method = null;
 
-		if (MonkeygreaseFilter.remoteConfigURL != "") {
+		if (MonkeygreaseFilter.remoteConfigURL != "" &&
+				MonkeygreaseFilter.remoteConfigURL != null) {
 			method = new GetMethod(MonkeygreaseFilter.remoteConfigURL);
 			method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
 					new DefaultHttpMethodRetryHandler(3, false));
@@ -110,7 +111,8 @@ public class Config {
 		try {
 			Document doc = parser.parse(is);
 			
-			if (MonkeygreaseFilter.remoteConfigURL != "")
+			if (MonkeygreaseFilter.remoteConfigURL != "" &&
+					MonkeygreaseFilter.remoteConfigURL != null )
 				method.releaseConnection();
 
 			NodeList rulesConf = doc.getElementsByTagName("rule");
