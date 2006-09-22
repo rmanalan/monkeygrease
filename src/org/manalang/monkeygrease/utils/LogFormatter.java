@@ -28,11 +28,13 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 /**
+ * LogFormatter is used to format the log file Monkeygrease creates
+ * 
  * @author Rich Manalang
- * @version 0.13 Build 294 Apr 12, 2006 02:40 GMT
+ * @version 0.20 Build 308 Sep 22, 2006 18:03 GMT
  */
 public class LogFormatter extends Formatter {
-	
+
 	public LogFormatter() {
 		super();
 	}
@@ -40,10 +42,8 @@ public class LogFormatter extends Formatter {
 	public String format(LogRecord lr) {
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT,
 				DateFormat.SHORT);
-		String slr = df.format(new Date(lr.getMillis()))
-			+ " (" + lr.getLevel() + "): "
-			+ lr.getMessage()
-			+ "\n";
+		String slr = df.format(new Date(lr.getMillis())) + " (" + lr.getLevel()
+				+ "): " + lr.getMessage() + "\n";
 		return slr;
 	}
 

@@ -40,6 +40,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXParseException;
 
+/**
+ * Config class represents the rules defined in the configuration file.
+ * 
+ * @author Rich Manalang
+ * @version 0.20 Build 308 Sep 22, 2006 18:03 GMT
+ */
 public class Config {
 
 	private static final String DEFAULT_WEB_CONF_FILE = "/WEB-INF/monkeygrease.xml";
@@ -54,18 +60,19 @@ public class Config {
 	}
 
 	public synchronized void load() {
-		
+
 		InputStream is = null;
 		GetMethod method = null;
 
-		if (MonkeygreaseFilter.remoteConfigURL != "" &&
-				MonkeygreaseFilter.remoteConfigURL != null) {
+		if (MonkeygreaseFilter.remoteConfigURL != ""
+				&& MonkeygreaseFilter.remoteConfigURL != null) {
 			method = new GetMethod(MonkeygreaseFilter.remoteConfigURL);
 			method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
 					new DefaultHttpMethodRetryHandler(3, false));
 			try {
 				// Execute the method.
-				int statusCode = MonkeygreaseFilter.client.executeMethod(method);
+				int statusCode = MonkeygreaseFilter.client
+						.executeMethod(method);
 
 				if (statusCode != HttpStatus.SC_OK) {
 					MonkeygreaseFilter.log.severe("Method failed: "
@@ -88,7 +95,7 @@ public class Config {
 						+ DEFAULT_WEB_CONF_FILE);
 			}
 		}
-		
+
 		DocumentBuilder parser;
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -110,9 +117,9 @@ public class Config {
 
 		try {
 			Document doc = parser.parse(is);
-			
-			if (MonkeygreaseFilter.remoteConfigURL != "" &&
-					MonkeygreaseFilter.remoteConfigURL != null )
+
+			if (MonkeygreaseFilter.remoteConfigURL != ""
+					&& MonkeygreaseFilter.remoteConfigURL != null)
 				method.releaseConnection();
 
 			NodeList rulesConf = doc.getElementsByTagName("rule");

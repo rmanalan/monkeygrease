@@ -48,7 +48,7 @@
 		<servlet-class>
 			org.manalang.monkeygrease.utils.HttpClient
 		</servlet-class>
-		<!--Comment out the following init params if you don't want to use an HTTP proxy
+		<!--Comment out the following init params if you don't want to use an HTTP proxy -->
 		<init-param>
 			<param-name>ProxyHost</param-name>
 			<param-value></param-value>
@@ -56,7 +56,7 @@
 		<init-param>
 			<param-name>ProxyPort</param-name>
 			<param-value></param-value>
-		</init-param>-->
+		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MonkeygreaseProxyClient</servlet-name>

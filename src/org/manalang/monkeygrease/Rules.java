@@ -26,8 +26,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ * The Rules class contains both the rules defined in the configuration file and
+ * the rules to be applied to the current URL
+ * 
  * @author Rich Manalang
- * @version 0.13 Build 294 Apr 12, 2006 02:40 GMT
+ * @version 0.20 Build 308 Sep 22, 2006 18:03 GMT
  */
 public class Rules extends ArrayList {
 

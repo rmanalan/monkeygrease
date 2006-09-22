@@ -34,7 +34,7 @@
 				<include name="**/*.java" />
 			</fileset>
 		</replaceregexp>
-		<javac destdir="${output.dir}/classes" classpathref="classpath" debug="${javac.debug}" nowarn="${javac.nowarn}" deprecation="${javac.deprecation}" encoding="Cp1252">
+		<javac destdir="${output.dir}/classes"  classpathref="classpath" debug="${javac.debug}" nowarn="${javac.nowarn}" deprecation="${javac.deprecation}" encoding="Cp1252">
 			<src path="src" />
 		</javac>
 		<manifest file="${output.dir}/classes/META-INF/manifest.mf">

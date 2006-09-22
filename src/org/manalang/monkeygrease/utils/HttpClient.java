@@ -60,7 +60,7 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
  * more documentation on this feature.
  * 
  * @author Rich Manalang
- * @version 0.13 Build 294 Apr 12, 2006 02:40 GMT
+ * @version 0.20 Build 308 Sep 22, 2006 18:03 GMT
  */
 public class HttpClient extends javax.servlet.http.HttpServlet implements
 		javax.servlet.Servlet {

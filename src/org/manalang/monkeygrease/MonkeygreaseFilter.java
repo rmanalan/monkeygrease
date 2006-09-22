@@ -24,28 +24,20 @@ package org.manalang.monkeygrease;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.manalang.monkeygrease.utils.InsertAt;
 import org.manalang.monkeygrease.utils.LogFormatter;
 import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
 
@@ -108,7 +100,7 @@ import org.manalang.monkeygrease.utils.MonkeygreaseResponseWrapper;
  * </p>
  * 
  * @author Rich Manalang
- * @version 0.13 Build 294 Apr 12, 2006 02:40 GMT
+ * @version 0.20 Build 308 Sep 22, 2006 18:03 GMT
  */
 public class MonkeygreaseFilter implements Filter {
 
@@ -144,15 +136,15 @@ public class MonkeygreaseFilter implements Filter {
 
 	private long confReloadLastCheck;
 
-	private long confLastLoad;
+	private static FileHandler fh;
+
+	public static long confLastLoad;
 
 	public static HttpClient client;
 
 	public static boolean COMMENTS_ON;
 
 	public static Logger log = Logger.getLogger("org.manalang.monkeygrease");
-
-	private static FileHandler fh;
 
 	public static String remoteConfigURL;
 
@@ -241,14 +233,6 @@ public class MonkeygreaseFilter implements Filter {
 	}
 
 	/**
-	 * Destroys filter. Internal servlet filter method.
-	 */
-	public void destroy() {
-		fc = null;
-		fh.close();
-	}
-
-	/**
 	 * Main filter process. Internal servlet filter method.
 	 * 
 	 * @param request
@@ -259,27 +243,28 @@ public class MonkeygreaseFilter implements Filter {
 	 */
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
+		
 		if (fc == null)
 			return;
-		
-        HttpServletRequest hreq = (HttpServletRequest)request;
-        
-        // Exit if request is for XHR proxy servlet
-        if(hreq.getRequestURI().equals("/monkeygreaseproxy"))
-            return;
+
+		HttpServletRequest hreq = (HttpServletRequest) request;
+
+		// Exit if request is for XHR proxy servlet
+		if (hreq.getRequestURI().equals("/monkeygreaseproxy"))
+			return;
 
 		log.info("*** Request Processing Begins ***");
 
-		// Capture the stream which writes response to the client
-		ServletOutputStream out = response.getOutputStream();
+		// Check to see if config file needs to be loaded
+		reloadConfig();
 
 		// Create response wrapper so we can modify the original response
 		MonkeygreaseResponseWrapper wrappedResponse = new MonkeygreaseResponseWrapper(
-				(HttpServletResponse) response);
-		
+				hreq, response, rules);
+
 		// Exit if original response has a Content-Encoding header...
 		// this prevents Monkeygrease from processing gzipped content.
-		// There doesn't seem to be a way to get the actual value of 
+		// There doesn't seem to be a way to get the actual value of
 		// a response header... need to look into this more.
 		if (wrappedResponse.containsHeader("Content-Encoding"))
 			return;
@@ -289,225 +274,62 @@ public class MonkeygreaseFilter implements Filter {
 
 		// Make sure we only process HTML content
 		String ct = wrappedResponse.getContentType();
+		MonkeygreaseFilter.log.fine("Request content type: " + ct);
+		if (ct == null || ct.indexOf("text/html") == -1)
+			return;
+		
+		wrappedResponse.getOutputStream().close();
 
-		log.fine("Request content type: " + ct);
-		if (ct != null && ct.indexOf("text/html") != -1) {
+		log.info("*** Request Processing Ends ***");
 
-			// check to see if the conf needs reloading
-			long now = System.currentTimeMillis();
-			if (confReloadCheckEnabled && !confReloadInProgress
-					&& (now - confReloadCheckInterval) > confReloadLastCheck) {
-				confReloadInProgress = true;
-				confReloadLastCheck = now;
+	}
 
-				log.fine("starting conf reload check");
-				
-				if (remoteConfigURL == "") {
-					long confFileCurrentTime = getConfFileLastModified();
-					if (confLastLoad < confFileCurrentTime) {
-						// reload conf
-						confLastLoad = System.currentTimeMillis();
-						log.config("Conf file modified since last load, reloading");
-						cf.load();
-						rules = cf.getRules();
-					} else {
-						log.config("Conf is not modified");
-					}
-				} else {
-					log.config("Conf file reloading from remote URL");
+	/**
+	 * Reloads Monkeygrease config file if needed
+	 */
+	private void reloadConfig() {
+		// check to see if the rules needs reloading
+		long now = System.currentTimeMillis();
+		if (confReloadCheckEnabled && !confReloadInProgress
+				&& (now - confReloadCheckInterval) > confReloadLastCheck) {
+			confReloadInProgress = true;
+			confReloadLastCheck = now;
+
+			log.fine("starting conf reload check");
+
+			if (remoteConfigURL == "") {
+				long confFileCurrentTime = getConfFileLastModified();
+				if (confLastLoad < confFileCurrentTime) {
+					// reload rules
+					confLastLoad = System.currentTimeMillis();
+					log.config("Conf file modified since last load, reloading");
 					cf.load();
 					rules = cf.getRules();
-				}
-
-				confReloadInProgress = false;
-			}
-
-			// don't process if no rules available
-			if (rules == null) {
-				out.write(wrappedResponse.getData());
-				out.close();
-				return;
-			}
-
-			log.info("Number of rules loaded: " + rules.size());
-
-			// filter rules based on request url
-			Rules rulesToApply = new Rules();
-			Iterator rulesIter = rules.iterator();
-			while (rulesIter.hasNext()) {
-				Rule rule = (Rule) rulesIter.next();
-				log.info("Rule being evaluated: " + rule.getName());
-				String uri = hreq.getRequestURI();
-				String qry = hreq.getQueryString();
-				String url = (qry != null) ? (uri + "?" + qry) : uri;
-
-				log.info("Request URL to match: " + url);
-
-				Pattern p = rule.getPattern();
-				Matcher m = p.matcher(url);
-				if (!m.matches()) {
-					log.info("Request URL doesn't match pattern");
 				} else {
-					rulesToApply.add(rule);
-					log
-							.info("Request URL matches... adding rule to rulesToApply");
+					log.config("Conf is not modified");
 				}
-			}
-			log.info("Number of rules to apply: " + rulesToApply.size());
-
-			// Don't bother processing if no rules apply
-			if (rulesToApply.size() == 0) {
-				out.write(wrappedResponse.getData());
-				out.close();
-				return;
+			} else {
+				log.config("Conf file reloading from remote URL");
+				cf.load();
+				rules = cf.getRules();
 			}
 
-			// Process response
-			String strResponse = new String((wrappedResponse.getData()));
-			String newResponse = processResponse(strResponse, rulesToApply);
+			confReloadInProgress = false;
+		}
 
-			// Reset content length header based on modified response
-			wrappedResponse.setContentLength(newResponse.length());
+		log.info("Number of rules loaded: " + rules.size());
+	}
 
-			// write the modified response back out through the original
-			// response stream
-			out.write(newResponse.getBytes());
-		} else
-			// if not text/html write out original response
-			out.write(wrappedResponse.getData());
-
-		// finally, close the response writer
-		out.close();
-		log.info("*** Request Processing Ends ***");
+	/**
+	 * Destroys filter. Internal servlet filter method.
+	 */
+	public void destroy() {
+		fc = null;
+		fh.close();
 	}
 
 	private long getConfFileLastModified() {
 		File confFile = new File(sc.getRealPath(cf.getDEFAULT_WEB_CONF_FILE()));
 		return confFile.lastModified();
-	}
-
-	/**
-	 * Processes response rules. Returns the response as a string with rules
-	 * applied.
-	 * 
-	 * @param sResponse
-	 * @return Modified response string based on rules applied
-	 */
-	public String processResponse(String strResponse, Rules rulesToApply) {
-		String tagsToInsert = "";
-		String modResponse = strResponse;
-		String headBeginMarker = "<!-- mg#head#begin#marker -->";
-		String bodyBeginMarker = "<!-- mg#body#begin#marker -->";
-		boolean headBeginInserted = false;
-		boolean bodyBeginInserted = false;
-
-		Iterator rulesToApplyIter = rulesToApply.iterator();
-		while (rulesToApplyIter.hasNext()) {
-			Rule ruleToApply = (Rule) rulesToApplyIter.next();
-			tagsToInsert = ruleToApply.toString();
-			switch (ruleToApply.getInsertAt()) {
-			case InsertAt.HEAD_BEGIN:
-				if (!headBeginInserted) {
-					if (tagsToInsert != "") {
-						tagsToInsert = "<head>\n" + tagsToInsert
-								+ headBeginMarker;
-						modResponse = findAndReplace(tagsToInsert, modResponse,
-								"<head>");
-						headBeginInserted = true;
-						log.fine("<head> found... inserting rule");
-					} else {
-						log.fine("No <head> found");
-					}
-				} else {
-					if (tagsToInsert != "") {
-						tagsToInsert = tagsToInsert + headBeginMarker;
-						modResponse = findAndReplace(tagsToInsert, modResponse,
-								headBeginMarker);
-						log.fine("<head> found... inserting rule");
-					} else {
-						log.fine("No <head> found");
-					}
-				}
-				break;
-
-			case InsertAt.HEAD_END:
-				if (tagsToInsert != "") {
-					tagsToInsert += "</head>";
-					modResponse = findAndReplace(tagsToInsert, modResponse,
-							"</head>");
-					log.fine("</head> found... inserting rule");
-				} else {
-					log.fine("No </head> found");
-				}
-				break;
-
-			case InsertAt.BODY_BEGIN:
-				if (!bodyBeginInserted) {
-					if (tagsToInsert != "") {
-						Pattern p = Pattern.compile("<body[^>]*>",
-								Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
-										| Pattern.DOTALL);
-						Matcher m = p.matcher(modResponse);
-						StringBuffer sb = new StringBuffer();
-						do {
-							if (!m.find())
-								break;
-							String origBody = m.group();
-							if (origBody == null)
-								continue;
-							m.appendReplacement(sb, origBody.replaceAll("\\$",
-									"\\\\\\$")
-									+ "\n" + tagsToInsert + bodyBeginMarker);
-							break;
-						} while (true);
-						m.appendTail(sb);
-						modResponse = sb.toString();
-						bodyBeginInserted = true;
-						log.fine("<body> found... inserting rule");
-					} else {
-						log.fine("No <body> found");
-					}
-				} else {
-					if (tagsToInsert != "") {
-						tagsToInsert = tagsToInsert + bodyBeginMarker;
-						modResponse = findAndReplace(tagsToInsert, modResponse,
-								bodyBeginMarker);
-						log.fine("<body> found... inserting rule");
-					} else {
-						log.fine("No <body> found");
-					}
-				}
-				break;
-
-			case InsertAt.BODY_END:
-				if (tagsToInsert != "") {
-					tagsToInsert += "\n</body>";
-					modResponse = findAndReplace(tagsToInsert, modResponse,
-							"</body>");
-					log.fine("</body> found... inserting rule");
-				} else {
-					log.fine("No </body> found");
-				}
-				break;
-			}
-		}
-
-		if (COMMENTS_ON) {
-			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-					DateFormat.LONG);
-			modResponse = "<!-- This page has been Monkeygrease'd (Config file last loaded on "
-					+ df.format(new Date(confLastLoad))
-					+ ") -->\n"
-					+ modResponse;
-		}
-		return modResponse;
-	}
-
-	private String findAndReplace(String tagsToInsert, String modResponse,
-			String strPattern) {
-		Pattern p = Pattern.compile(strPattern, Pattern.CASE_INSENSITIVE);
-		Matcher m = p.matcher(modResponse);
-		modResponse = m.replaceFirst(tagsToInsert);
-		return modResponse;
 	}
 }

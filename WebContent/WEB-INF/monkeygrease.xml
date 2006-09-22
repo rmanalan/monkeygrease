@@ -3,31 +3,31 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://monkeygrease.org http://monkeygrease.org/monkeygrease.xsd ">
 
-	<rule enabled="true" name="Sample rule 1" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 1" url-pattern="/.*"
 		insert-at="head-begin">
 		<![CDATA[
 		<!-- Whatever you insert here gets injected as the first item in the <head> section -->
 		]]>
 	</rule>
-	<rule enabled="true" name="Sample rule 2" url-pattern="/.*"
-		insert-at="head-begin">
+	<rule enabled="false" name="Sample rule 2" url-pattern="/.*"
+		insert-at="head-end">
 		<![CDATA[
 		<!-- Whatever you insert here gets injected as the last item in the <head> section -->
 		]]>
 	</rule>
-	<rule enabled="true" name="Sample rule 3" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 3" url-pattern="/.*"
 		insert-at="body-begin">
 		<![CDATA[
 		<!-- Whatever you insert here gets injected as the first item in the <body> section -->
 		]]>
 	</rule>
-	<rule enabled="true" name="Sample rule 4" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 4" url-pattern="/.*"
 		insert-at="body-begin">
 		<![CDATA[
 		<!-- Whatever you insert here gets injected as the first item in the <body> section -->
 		]]>
 	</rule>
-	<rule enabled="true" name="Sample rule 5" url-pattern="/.*"
+	<rule enabled="false" name="Sample rule 5" url-pattern="/.*"
 		insert-at="body-end">
 		<![CDATA[
 		<!-- Whatever you insert here gets injected as the last item in the <body> section -->

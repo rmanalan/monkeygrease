@@ -23,12 +23,17 @@
 package org.manalang.monkeygrease.utils;
 
 /**
+ * InsertAt just defines the constants for the insertion points in the HTML
+ * 
  * @author Rich Manalang
- * @version 0.13 Build 294 Apr 12, 2006 02:40 GMT
+ * @version 0.20 Build 308 Sep 22, 2006 18:03 GMT
  */
 public class InsertAt {
 	public final static int HEAD_BEGIN = 0;
+
 	public final static int HEAD_END = 1;
+
 	public final static int BODY_BEGIN = 2;
+
 	public final static int BODY_END = 3;
 }
